@@ -3,10 +3,6 @@ package com.pot.sso.userstorage.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.ejb.Stateful;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -17,6 +13,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pot.sso.userstorage.readonly.CustomeResponse;
 
 //@Stateful
 public class AuthService {
@@ -25,7 +22,8 @@ public class AuthService {
 //	public static final String LOGIN_SUCCESS = "1";
 //	public static final String LOGIN_FAIL = "0";
 //	public static final String UNKNOWN = "NULL";
-	
+	private static final String host = System.getenv("CS_HOST");
+//	private static final String host="http://mimosa.customer.118.163.91.247.nip.io";
 	private static final Logger logger = Logger.getLogger(AuthService.class);
 
 //	private CustomUserStorageProvider customUserStorageProvider;
@@ -86,13 +84,13 @@ public class AuthService {
 //
 //	}
 	
-	public Map checkValidUsernamePassword(String username, String password, String idno) {
-		Map<String, Object> map = new HashMap<String, Object>();
+	public static CustomeResponse checkValidUsernamePassword(String loginId, String password, String idno, String xForwardFor) {
+		CustomeResponse map = new CustomeResponse();
 		try {
 			
 			
-			String customServeiceHostURL="http://mimosa.customer.118.163.91.247.nip.io";
-			String userUri=customServeiceHostURL+"/auth/user/"+idno+"/valid";
+			String userUri=host+"/auth/user/"+idno+"/valid";
+			
 			// create HTTP Client
 			HttpClient httpClient = HttpClientBuilder.create().build();
 			
@@ -101,8 +99,8 @@ public class AuthService {
 			
 			// Add additional header to getRequest which accepts application/xml data
 			getRequest.addHeader("accept", "application/json");
-			getRequest.addHeader("X-Forwarded-For", "192.168.1.1, 192.186.1.121, 192.168.2.122");
-			String json = "{\"username\":\""+username+"\",\"password\":\""+password+"\"}";
+			getRequest.addHeader("X-Forwarded-For", xForwardFor);
+			String json = "{\"username\":\""+loginId+"\",\"password\":\""+password+"\"}";
 		    StringEntity entity = new StringEntity(json);
 		    entity.setContentType("application/json");
 		    getRequest.setEntity(entity);
@@ -125,8 +123,10 @@ public class AuthService {
 			while ((output = br.readLine()) != null) {
 				sb.append(output);
 			}
+			logger.info(sb.toString());
 			ObjectMapper mapper = new ObjectMapper();
-			map = mapper.readValue(sb.toString(), Map.class);
+			
+			map =  mapper.readValue(sb.toString(), CustomeResponse.class);
 //			System.out.println(map.get("success"));
 //			System.out.println(map.get("data"));
 
@@ -140,8 +140,4 @@ public class AuthService {
 		return map;
 	}
 
-	private boolean supportsCredentialType(String type) {
-		// TODO Auto-generated method stub
-		return false;
-	}
 }

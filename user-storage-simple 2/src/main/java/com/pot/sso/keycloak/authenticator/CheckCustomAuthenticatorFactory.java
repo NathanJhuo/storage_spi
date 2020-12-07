@@ -1,5 +1,7 @@
 package com.pot.sso.keycloak.authenticator;
 
+import java.util.List;
+
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
@@ -10,10 +12,6 @@ import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.UserCredentialModel;
 import org.keycloak.provider.ProviderConfigProperty;
 
-import com.pot.sso.userstorage.service.AuthService;
-
-import java.util.List;
-
 /**
  * @author <a href="mailto:bill@burkecentral.com">Bill Burke</a>
  * @version $Revision: 1 $
@@ -22,7 +20,7 @@ public class CheckCustomAuthenticatorFactory implements AuthenticatorFactory,  C
 
     public static final String PROVIDER_ID = "CheckCustomAuthenticator";
     //  public static final UsernamePasswordForm SINGLETON = new UsernamePasswordForm();
-    private AuthService authService;
+//    private AuthService authService;
     
     @Override
     public Authenticator create(KeycloakSession session) {
@@ -34,6 +32,7 @@ public class CheckCustomAuthenticatorFactory implements AuthenticatorFactory,  C
     public void init(Config.Scope config) {
 //    	String authEndPoint = config.get("authEndPoint");
 //    	authService = new AuthService(authEndPoint);
+//    	authService = new AuthService();
     }
 
     @Override

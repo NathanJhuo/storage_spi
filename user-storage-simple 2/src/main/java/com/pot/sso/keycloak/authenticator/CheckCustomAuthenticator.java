@@ -3,16 +3,12 @@ package com.pot.sso.keycloak.authenticator;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -34,8 +30,8 @@ import org.keycloak.services.ServicesLogger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.zxing.common.StringUtils;
 import com.pot.sso.userstorage.readonly.CustomeResponse;
+import com.pot.sso.userstorage.service.AuthService;
 
 /**
  * @author <a href="mailto:bill@burkecentral.com">Bill Burke</a>
@@ -45,6 +41,7 @@ public class CheckCustomAuthenticator extends AbstractDirectGrantAuthenticator i
 	protected static ServicesLogger log = ServicesLogger.LOGGER;
 	private static final Logger logger = Logger.getLogger(CheckCustomAuthenticator.class);
     private static final String host = System.getenv("CS_HOST");
+//    private static final String host="http://mimosa.customer.118.163.91.247.nip.io";
 //	private AuthService authService;
 
 //	public CheckPwasswordDateForm(AuthService authService) {
@@ -90,7 +87,7 @@ public class CheckCustomAuthenticator extends AbstractDirectGrantAuthenticator i
 
 		String username = formData.getFirst("username");
         String password = formData.getFirst(CredentialRepresentation.PASSWORD);
-        String idno=formData.getFirst("idno");
+        String idno=null;
         String xForwardFor= null;
         if(null !=context.getHttpRequest().getHttpHeaders()) {
         	xForwardFor = context.getHttpRequest().getHttpHeaders().getHeaderString("X-Forwarded-For");
@@ -102,11 +99,14 @@ public class CheckCustomAuthenticator extends AbstractDirectGrantAuthenticator i
  
         String loginId = username;
         if(strArgs.length==2) {
-        	idno= strArgs[0];
+        	idno= strArgs[0].toUpperCase();
         	loginId= strArgs[1];
+        }else {
+        	logger.error("format error, username:"+username);
+        	return;
         }
         
-        CustomeResponse responseMap = this.checkValidUsernamePassword(loginId,password,idno, xForwardFor);
+        CustomeResponse responseMap = AuthService.checkValidUsernamePassword(loginId,password,idno, xForwardFor);
 		if(responseMap.getSuccess().equals("true")) {
 			logger.info("custom authenticate success");
 			context.success();
@@ -168,61 +168,61 @@ public class CheckCustomAuthenticator extends AbstractDirectGrantAuthenticator i
 
 	}
 	
-	public CustomeResponse checkValidUsernamePassword(String loginId, String password, String idno, String xForwardFor) {
-		CustomeResponse map = new CustomeResponse();
-		try {
-			
-			
-			String userUri=host+"/auth/user/"+idno+"/valid";
-			
-			// create HTTP Client
-			HttpClient httpClient = HttpClientBuilder.create().build();
-			
-			// Create new getRequest with below mentioned URL
-			HttpPost getRequest = new HttpPost(userUri);
-			
-			// Add additional header to getRequest which accepts application/xml data
-			getRequest.addHeader("accept", "application/json");
-			getRequest.addHeader("X-Forwarded-For", xForwardFor);
-			String json = "{\"username\":\""+loginId+"\",\"password\":\""+password+"\"}";
-		    StringEntity entity = new StringEntity(json);
-		    entity.setContentType("application/json");
-		    getRequest.setEntity(entity);
- 
-			// Execute your request and catch response
-			HttpResponse response = httpClient.execute(getRequest);
- 
-			// Check for HTTP response code: 200 = success
-			if (response.getStatusLine().getStatusCode() != 200) {
-				throw new RuntimeException("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
-			}
- 
-			// Get-Capture Complete application/xml body response
-			BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
-			String output;
-			StringBuilder sb = new StringBuilder();
-			System.out.println("============Output:============");
- 
-			// Simply iterate through XML response and show on console.
-			while ((output = br.readLine()) != null) {
-				sb.append(output);
-			}
-			logger.info(sb.toString());
-			ObjectMapper mapper = new ObjectMapper();
-			
-			map =  mapper.readValue(sb.toString(), CustomeResponse.class);
-//			System.out.println(map.get("success"));
-//			System.out.println(map.get("data"));
-
- 
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
- 
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return map;
-	}
+//	private CustomeResponse checkValidUsernamePassword(String loginId, String password, String idno, String xForwardFor) {
+//		CustomeResponse map = new CustomeResponse();
+//		try {
+//			
+//			
+//			String userUri=host+"/auth/user/"+idno+"/valid";
+//			
+//			// create HTTP Client
+//			HttpClient httpClient = HttpClientBuilder.create().build();
+//			
+//			// Create new getRequest with below mentioned URL
+//			HttpPost getRequest = new HttpPost(userUri);
+//			
+//			// Add additional header to getRequest which accepts application/xml data
+//			getRequest.addHeader("accept", "application/json");
+//			getRequest.addHeader("X-Forwarded-For", xForwardFor);
+//			String json = "{\"username\":\""+loginId+"\",\"password\":\""+password+"\"}";
+//		    StringEntity entity = new StringEntity(json);
+//		    entity.setContentType("application/json");
+//		    getRequest.setEntity(entity);
+// 
+//			// Execute your request and catch response
+//			HttpResponse response = httpClient.execute(getRequest);
+// 
+//			// Check for HTTP response code: 200 = success
+//			if (response.getStatusLine().getStatusCode() != 200) {
+//				throw new RuntimeException("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
+//			}
+// 
+//			// Get-Capture Complete application/xml body response
+//			BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
+//			String output;
+//			StringBuilder sb = new StringBuilder();
+//			System.out.println("============Output:============");
+// 
+//			// Simply iterate through XML response and show on console.
+//			while ((output = br.readLine()) != null) {
+//				sb.append(output);
+//			}
+//			logger.info(sb.toString());
+//			ObjectMapper mapper = new ObjectMapper();
+//			
+//			map =  mapper.readValue(sb.toString(), CustomeResponse.class);
+////			System.out.println(map.get("success"));
+////			System.out.println(map.get("data"));
+//
+// 
+//		} catch (ClientProtocolException e) {
+//			e.printStackTrace();
+// 
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		return map;
+//	}
 
 	@Override
 	public String getId() {

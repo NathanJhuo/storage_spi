@@ -1,13 +1,14 @@
 package com.pot.sso.userstorage.readonly;
 
 import org.keycloak.component.ComponentModel;
-import org.keycloak.credential.CredentialInputUpdater;
 import org.keycloak.credential.CredentialInputValidator;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.cache.OnUserCache;
 import org.keycloak.storage.UserStorageProvider;
 import org.keycloak.storage.user.UserLookupProvider;
 import org.keycloak.storage.user.UserQueryProvider;
+
+
 
 public interface ILocalCustomUserStorageProvider
 		extends UserStorageProvider, UserLookupProvider, UserQueryProvider, CredentialInputValidator, OnUserCache {
@@ -17,5 +18,6 @@ public interface ILocalCustomUserStorageProvider
 	void setModel(ComponentModel model);
 
 	void setSession(KeycloakSession session);
+
 
 }
