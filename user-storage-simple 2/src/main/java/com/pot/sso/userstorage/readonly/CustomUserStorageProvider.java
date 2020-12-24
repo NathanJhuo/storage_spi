@@ -235,25 +235,12 @@ public class CustomUserStorageProvider implements ILocalCustomUserStorageProvide
 		if (!supportsCredentialType(input.getType()) || !(input instanceof UserCredentialModel))
 			return false;
 
-		UserCredentialModel cred = (UserCredentialModel) input;
 		String[] strArgs = user.getUsername().split("_");
-		String idno=null;
-		String loginId=null;
 		if(strArgs.length==2) {
-		    idno = strArgs[0].toUpperCase();
-			logger.info("idno:"+idno);
-			loginId=strArgs[1];
-		}else {
-			logger.error("isValid failed, username:"+user.getUsername());
-			return false;
-		}
-
-		CustomeResponse responseMap = AuthService.checkValidUsernamePassword(loginId, cred.getValue(), idno,"192.168.0.0");
-		if(responseMap.getSuccess().equals("true")) {
-			logger.info("isValid success");
+			logger.info("isValid ok");
 			return true;
 		}else {
-			logger.info("isValid failed");
+			logger.error("isValid failed, username:"+user.getUsername());
 			return false;
 		}
 
