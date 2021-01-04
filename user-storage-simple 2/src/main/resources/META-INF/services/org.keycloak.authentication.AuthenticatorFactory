@@ -1,1 +1,2 @@
 com.pot.sso.keycloak.authenticator.CheckCustomAuthenticatorFactory
+com.pot.sso.keycloak.authenticator.CheckEmployeeAuthenticatorFactory
